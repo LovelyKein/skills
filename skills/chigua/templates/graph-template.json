@@ -1,0 +1,25 @@
+{
+  "people": [],
+  "events": [],
+  "relationships": [],
+  "self": {
+    "personality_traits": [],
+    "communication_style": [],
+    "emotion_patterns": [],
+    "values_and_redlines": [],
+    "blind_spots": [],
+    "decision_preferences": [],
+    "social_energy": [],
+    "stress_reactions": [],
+    "relationship_scripts": [],
+    "growth_trajectory": [],
+    "meta": {
+      "updated_at": ""
+    }
+  },
+  "sync": {
+    "last_pull_time": null,
+    "last_push_time": null,
+    "feishu_base_id": null
+  }
+}

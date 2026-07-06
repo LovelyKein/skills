@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.so
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 运行时数据（用户数据，不进仓库）
+graph.json
+fund-holdings.md
+fund-operations-log.md
