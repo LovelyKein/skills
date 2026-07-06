@@ -63,13 +63,13 @@
 1. 通过 `npx skills` 安装：
 
    ```bash
-   npx skills add https://github.com/LovelyKein/skills
+   npx skills add https://github.com/LovelyKein/skills --skill fund-briefing
    ```
 
 2. 安装 Python 依赖（仅 PDF 导入功能需要）：
 
    ```bash
-   pip install pypdf
+   pip install pdfplumber
    ```
 
 3. 首次激活时，技能会自动从 `templates/` 目录复制空白模板文件到工作目录，进入无持仓模式。
@@ -137,10 +137,10 @@ fund-briefing/                              # 技能包（git 仓库，可分发
 
 ## 环境依赖
 
-| 依赖   | 版本   | 用途                              |
-| ------ | ------ | --------------------------------- |
-| Python | >= 3.8 | 脚本运行环境                      |
-| pypdf  | >= 4.0 | PDF 文本提取（仅 PDF 导入时需要） |
+| 依赖       | 版本    | 用途                              |
+| ---------- | ------- | --------------------------------- |
+| Python     | >= 3.8  | 脚本运行环境                      |
+| pdfplumber | >= 0.10 | PDF 表格提取（仅 PDF 导入时需要） |
 
 数据来源均为公开网页（无需 API Key）：
 
