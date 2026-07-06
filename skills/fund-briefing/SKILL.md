@@ -94,6 +94,12 @@ description: 全流程基金持仓简报技能：解析蚂蚁财富交易明细P
 | AI HOT   | `aihot.virxact.com`  | AI行业热点资讯                 |
 | 智通财经 | `zhitongcaijing.com` | 隔夜美股收盘数据、宏观经济数据 |
 
+### 基金净值查询强制方法
+
+查任何基金历史净值时，必须直接 `WebFetch` 访问 `https://fundf10.eastmoney.com/jjjz_{基金代码}.html`（例：查 019764 的净值访问 `jjjz_019764.html`）抓取净值表。
+
+**严禁**用 `WebSearch` 做关键词模糊搜索来查净值——该方法返回杂乱新闻/聚合页，无法精确命中净值数据，会导致"查不到"的误判（实际上一律可查）。备选源：`https://dayfund.com.cn`、天天基金基金详情页。
+
 ### 新闻搜索清单（借鉴TradingAgents global_news_queries）
 
 每次简报联网搜索时，必须覆盖以下预定义搜索维度，确保不遗漏关键信息面：
