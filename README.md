@@ -27,6 +27,19 @@ skills/
 
 每个技能以 `SKILL.md` 为入口（YAML frontmatter + 指令正文），自包含运行所需的所有脚本和模板。
 
-## 备注
+## 安装与更新
 
-技能规范参考 [anthropics/skills](https://github.com/anthropics/skills)。
+```bash
+# 安装全部技能
+npx skills add https://github.com/LovelyKein/skills --skill '*' -g
+
+# 安装单个技能
+npx skills add https://github.com/LovelyKein/skills --skill fund-briefing -g
+npx skills add https://github.com/LovelyKein/skills --skill chigua -g
+
+# 更新已安装技能
+npx skills update fund-briefing
+npx skills update chigua
+# 或更新全部
+npx skills update
+```
