@@ -78,7 +78,7 @@ def extract_records_from_pdf(pdf_path: str) -> list[dict]:
                     if rec["fund_name"]:
                         rec["fund_name"] = re.sub(r"\s+", "", rec["fund_name"])
 
-                    # 订单号：取最后 8 位作为短编号
+                    # 订单号：原始为多段拼接，取最后 8 位作为短编号
                     raw_order = rec["order_no"].replace(" ", "")
                     if len(raw_order) >= 8:
                         rec["order_no"] = raw_order[-8:]
@@ -104,6 +104,7 @@ def _parse_datetime(dt_str: str) -> datetime | None:
     """解析 '2026/07/02 11:12' 格式。"""
     if not dt_str:
         return None
+    # PDF 断行可能导致 "2026/07/02" 中间多余空格
     cleaned = re.sub(r"\s+", "", dt_str)
     try:
         return datetime.strptime(cleaned, "%Y/%m/%d%H:%M")
@@ -122,6 +123,14 @@ def derive_holdings(records: list[dict]) -> tuple[dict, list[dict]]:
     返回 (holdings, cleared)：
       - holdings: 仍有持仓的基金
       - cleared: 已清仓的基金（份额归零或为负）
+
+    转换逻辑说明：
+      - 跨TA转换（用户跨TA转换）：PDF 显示两行（转出+转入）
+        转出行：申请金额=0.00，申请份额=数字 → 减份额
+        转入行：申请金额=数字，申请份额=/ → 加份额
+      - 同公司转换（用户转换）：PDF 仅显示转入行
+        该行确认份额 = 转入方获得的份额 → 加份额
+        ⚠ 转出方信息在 PDF 中缺失，无法自动扣除，需手动核实
     """
     funds: dict[str, dict] = defaultdict(lambda: {
         "current_shares": 0.0,
@@ -154,15 +163,19 @@ def derive_holdings(records: list[dict]) -> tuple[dict, list[dict]]:
             funds[code]["current_shares"] -= shares
             funds[code]["total_redeemed"] += amt
         elif tx_type == "用户跨TA转换":
+            # 转出：申请金额为 0.00 或 /，申请份额有值
             if apply_shares and apply_shares != "/" and apply_amount in ("0.00", "0", "/", ""):
                 funds[code]["current_shares"] -= shares
                 funds[code]["total_redeemed"] += amt
             else:
+                # 转入
                 funds[code]["current_shares"] += shares
                 funds[code]["total_invested"] += amt
         elif tx_type == "用户转换":
+            # 同公司转换，PDF 仅显示转入行，转出方信息缺失
             funds[code]["current_shares"] += shares
             funds[code]["total_invested"] += amt
+            # 记录待手动核实的转出信息
             out_shares = _to_float(apply_shares) if apply_shares and apply_shares != "/" else 0.0
             if out_shares > 0:
                 conversions_out_missing.append({
@@ -210,6 +223,7 @@ def classify_records(records: list[dict]) -> dict:
 def write_operations_log(groups: dict, out_path: str):
     lines = [_OPERATIONS_LOG_HEADER]
 
+    # 每个分类对应的交易类型
     type_order = [
         ("转换（含跨TA）", ["用户跨TA转换", "用户转换"]),
         ("买入", ["用户买入"]),
@@ -338,7 +352,7 @@ def write_holdings(holdings: dict, cleared: list[dict], out_path: str):
     lines.append("")
     lines.append("## 各基金详细信息")
     lines.append("")
-    lines.append("（基金详细档案将在信息充分后由AI补充。）")
+    lines.append("（基金详细档案将在信息充分后由AI补充。可通过天天基金网查询重仓股、经理、规模等。）")
     lines.append("")
     lines.append("---")
     lines.append("")
