@@ -96,9 +96,23 @@ description: 全流程基金持仓简报技能：解析蚂蚁财富交易明细P
 
 ### 基金净值查询强制方法
 
-查任何基金历史净值时，必须直接 `WebFetch` 访问 `https://fundf10.eastmoney.com/jjjz_{基金代码}.html`（例：查 019764 的净值访问 `jjjz_019764.html`）抓取净值表。
+**首选方法（API接口）**：使用 PowerShell `Invoke-RestMethod` 调用天天基金网净值 API，一次查询所有持仓基金的最新净值，`pageSize=10` 可获取最近 10 个交易日数据。
 
-**严禁**用 `WebSearch` 做关键词模糊搜索来查净值——该方法返回杂乱新闻/聚合页，无法精确命中净值数据，会导致"查不到"的误判（实际上一律可查）。备选源：`https://dayfund.com.cn`、天天基金基金详情页。
+```powershell
+$codes = @("001180","016848",...); foreach ($code in $codes) {
+  $r = Invoke-RestMethod -Uri "https://api.fund.eastmoney.com/f10/lsjz?fundCode=$code&pageIndex=1&pageSize=10" `
+    -Headers @{Referer="https://fundf10.eastmoney.com/jjjz_$code.html"};
+  # $r.Data.LSJZList[0].DWJZ 即为最新净值, .FSRQ 为日期, .JZZZL 为日增长率
+}
+```
+
+- `pageSize=10`：获取最近 10 个交易日数据，满足近 1 周涨跌幅计算和简报趋势分析需求
+- `pageSize=1`：仅获取当日最新净值，用于快速更新持仓金额
+- 必须携带 `Referer` 请求头，否则返回 `ErrCode: -999`
+
+**兜底方法**：直接 `WebFetch` 访问 `https://fund.eastmoney.com/{基金代码}.html`（天天基金主页，非 `fundf10` 净值专页），页面顶部直接显示最新单位净值。
+
+**严禁**用 `WebSearch` 做关键词模糊搜索来查净值——该方法返回杂乱新闻/聚合页，无法精确命中净值数据，会导致"查不到"的误判（实际上一律可查）。备选源：`https://dayfund.com.cn`。
 
 ### 新闻搜索清单（借鉴TradingAgents global_news_queries）
 
